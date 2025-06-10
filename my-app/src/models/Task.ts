@@ -1,51 +1,27 @@
-export type Status = "pending" | "in-progress" | "completed";
+export type TaskStatus = "pending" | "in-progress" | "completed";
 
-export interface TaskProps {
-  id: number;
-  title: string;
-  categoryId: number;
-  status?: Status;
-  startDate?: string;
-  endDate?: string;
+export class Category {
+  constructor(public id: number, public name: string) {}
 }
 
-export default class Task {
-  id: number;
-  title: string;
-  categoryId: number;
-  status: Status;
-  startDate: string;
-  endDate: string;
+export class Task {
+  public endDate?: Date;
+  constructor(
+    public id: number,
+    public title: string,
+    public status: TaskStatus = "pending",
+    public category?: Category,
+    public startDate: Date = new Date()
+  ) {}
 
-  constructor({
-    id,
-    title,
-    categoryId,
-    status = "pending",
-    startDate = new Date().toISOString(),
-    endDate = "",
-  }: TaskProps) {
-    this.id = id;
-    this.title = title;
-    this.categoryId = categoryId;
-    this.status = status;
-    this.startDate = startDate;
-    this.endDate = endDate;
-  }
-
-  markCompleted(): void {
+  markCompleted() {
     this.status = "completed";
-    this.endDate = new Date().toISOString();
+    this.endDate = new Date();
   }
 
-  update(fields: Partial<Omit<TaskProps, "id">>): void {
-    Object.assign(this, fields);
-  }
-
-  duration(): number | null {
-    if (this.startDate && this.endDate) {
-      return Date.parse(this.endDate) - Date.parse(this.startDate);
-    }
-    return null;
+  update(title: string, status: TaskStatus, category?: Category) {
+    this.title = title;
+    this.status = status;
+    this.category = category;
   }
 }
