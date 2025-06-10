@@ -6,13 +6,22 @@ El proyecto demuestra el uso de tres paradigmas de programación:
 
 - **Orientado a Objetos**: clases `Task` y `Category` modelan las entidades principales.
 - **Funcional**: utilidades como `filterByStatus`, `filterByCategory` o `percentageCompleted` usan funciones de orden superior.
-- **Procedural**: se proporciona un pequeño script de línea de comandos en `my-app/scripts/cli.js` con funciones simples para gestionar un menú y leer/escribir archivos.
+- **Procedural**: la API en `src/app/api/tasks` implementa funciones simples para manipular los archivos de datos.
 
 ## Estructura
 
 - `my-app/` – aplicación web Next.js
-- `my-app/scripts/cli.js` – script de consola
-- `my-app/data/` – almacena datos del script CLI
+- `my-app/data/` – almacena datos en formato JSON
+
+## API
+
+La API expone los siguientes endpoints:
+
+- `GET /api/tasks` – lista todas las tareas
+- `POST /api/tasks` – crea una nueva tarea (recibe `title`, `status` y `category`)
+- `GET /api/tasks/:id` – obtiene una tarea específica
+- `PUT /api/tasks/:id` – actualiza una tarea
+- `DELETE /api/tasks/:id` – elimina una tarea
 
 ## Ejecución
 
@@ -26,15 +35,8 @@ npm run dev
 
 Abrir `http://localhost:3000` en el navegador.
 
-2. Ejecutar el script de consola (opcional):
-
-```bash
-npm run cli
-```
-
 ## Herramientas
 
 - [Next.js](https://nextjs.org/) + React
 - TypeScript
 - Node.js
-
