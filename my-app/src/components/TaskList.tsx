@@ -1,15 +1,20 @@
 "use client";
 import { useState } from "react";
-import { Task, TaskStatus } from "@/models/Task";
+import { Task, TaskStatus, Category } from "@/models/Task";
 import { deleteTask } from "@/utils/taskUtils";
 
 interface Props {
   tasks: Task[];
+  categories: Category[];
   onUpdate: (tasks: Task[]) => void;
 }
 
-export default function TaskList({ tasks, onUpdate }: Props) {
+export default function TaskList({ tasks, categories, onUpdate }: Props) {
   const [filter, setFilter] = useState<TaskStatus | "all">("all");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [title, setTitle] = useState("");
+  const [status, setStatus] = useState<TaskStatus>("pending");
+  const [category, setCategory] = useState<Category | undefined>();
 
   const filtered =
     filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
@@ -21,6 +26,19 @@ export default function TaskList({ tasks, onUpdate }: Props) {
   function handleComplete(task: Task) {
     task.markCompleted();
     onUpdate([...tasks]);
+  }
+
+  function startEdit(task: Task) {
+    setEditingId(task.id);
+    setTitle(task.title);
+    setStatus(task.status);
+    setCategory(task.category);
+  }
+
+  function saveEdit(task: Task) {
+    task.update(title, status, category);
+    onUpdate([...tasks]);
+    setEditingId(null);
   }
 
   return (
@@ -41,26 +59,85 @@ export default function TaskList({ tasks, onUpdate }: Props) {
       <ul className="space-y-2">
         {filtered.map((task) => (
           <li key={task.id} className="border p-2 flex justify-between">
-            <span>
-              {task.title}
-              {task.category ? ` - ${task.category.name}` : ""} [{task.status}]
-            </span>
-            <div className="space-x-2">
-              {task.status !== "completed" && (
-                <button
-                  onClick={() => handleComplete(task)}
-                  className="bg-green-500 px-2 text-white"
-                >
-                  Completar
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(task.id)}
-                className="bg-red-600 px-2 text-white"
-              >
-                Eliminar
-              </button>
-            </div>
+            {editingId === task.id ? (
+              <>
+                <div className="flex-grow flex gap-2">
+                  <input
+                    className="border p-1 flex-grow"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                  <select
+                    className="border p-1"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                  >
+                    <option value="pending">Pendiente</option>
+                    <option value="in-progress">En progreso</option>
+                    <option value="completed">Completada</option>
+                  </select>
+                  <select
+                    className="border p-1"
+                    value={category?.id ?? ""}
+                    onChange={(e) => {
+                      const id = parseInt(e.target.value);
+                      const cat = categories.find((c) => c.id === id);
+                      setCategory(cat);
+                    }}
+                  >
+                    <option value="">Sin categoría</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => saveEdit(task)}
+                    className="bg-blue-600 px-2 text-white"
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    className="bg-gray-400 px-2 text-white"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span>
+                  {task.title}
+                  {task.category ? ` - ${task.category.name}` : ""} [{task.status}]
+                </span>
+                <div className="space-x-2">
+                  {task.status !== "completed" && (
+                    <button
+                      onClick={() => handleComplete(task)}
+                      className="bg-green-500 px-2 text-white"
+                    >
+                      Completar
+                    </button>
+                  )}
+                  <button
+                    onClick={() => startEdit(task)}
+                    className="bg-yellow-500 px-2 text-white"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    className="bg-red-600 px-2 text-white"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>

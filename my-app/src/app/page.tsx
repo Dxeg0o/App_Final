@@ -19,7 +19,7 @@ export default function Home() {
         categories={categories}
         onAdd={(t) => setTasks([...tasks, t])}
       />
-      <TaskList tasks={tasks} onUpdate={setTasks} />
+      <TaskList tasks={tasks} categories={categories} onUpdate={setTasks} />
       <Stats tasks={tasks} />
     </main>
   );
