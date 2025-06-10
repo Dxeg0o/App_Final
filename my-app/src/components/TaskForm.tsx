@@ -1,23 +1,29 @@
 "use client";
 import { useState } from "react";
-import { createTask } from "@/utils/taskUtils";
-import { Category } from "@/models/Task";
+import { Category, Task } from "@/models/Task";
 
 interface Props {
   categories: Category[];
-  onAdd: (task: ReturnType<typeof createTask>) => void;
+  onAdd: (task: Task) => void;
 }
 
 export default function TaskForm({ categories, onAdd }: Props) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<Category | undefined>();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (title.trim() === "") return;
-    const task = createTask(title, "pending", category);
-    onAdd(task);
-    setTitle("");
+    const res = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, status: "pending", category }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      onAdd(Task.fromObject(data));
+      setTitle("");
+    }
   }
 
   return (

@@ -11,7 +11,7 @@ El proyecto demuestra el uso de tres paradigmas de programación:
 ## Estructura
 
 - `my-app/` – aplicación web Next.js
-- `my-app/data/` – almacena datos en formato JSON
+- `my-app/data/` – (obsoleto) datos antiguos en JSON
 
 ## API
 
@@ -31,6 +31,12 @@ La API expone los siguientes endpoints:
 cd my-app
 npm install
 npm run dev
+```
+
+Antes de iniciar, cree un archivo `.env.local` dentro de `my-app` con la cadena de conexión a MongoDB:
+
+```bash
+MONGODB_URI="mongodb+srv://dsolerolguin:<db_password>@cluster0.1zeyvn9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 ```
 
 Abrir `http://localhost:3000` en el navegador.

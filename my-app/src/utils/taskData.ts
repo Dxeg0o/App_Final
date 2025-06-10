@@ -1,16 +1,15 @@
-import { promises as fs } from 'fs';
-import { join } from 'path';
+import clientPromise from './mongodb';
 import { Task, TaskStatus, Category } from '@/models/Task';
 
-const dataFile = join(process.cwd(), 'my-app', 'data', 'tasks.json');
-
-export async function getTasks(): Promise<Task[]> {
-  const data = await fs.readFile(dataFile, 'utf-8');
-  return JSON.parse(data) as Task[];
+async function getCollection() {
+  const client = await clientPromise;
+  return client.db().collection('tasks');
 }
 
-export async function saveTasks(tasks: Task[]): Promise<void> {
-  await fs.writeFile(dataFile, JSON.stringify(tasks, null, 2));
+export async function getTasks(): Promise<Task[]> {
+  const col = await getCollection();
+  const docs = await col.find().toArray();
+  return docs.map((d: Record<string, unknown>) => Task.fromObject(d));
 }
 
 export async function addTask(
@@ -18,17 +17,18 @@ export async function addTask(
   status: TaskStatus = 'pending',
   category?: Category
 ): Promise<Task> {
-  const tasks = await getTasks();
-  const id = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+  const col = await getCollection();
+  const last = await col.find().sort({ id: -1 }).limit(1).toArray();
+  const id = last.length ? last[0].id + 1 : 1;
   const task = new Task(id, title, status, category);
-  tasks.push(task);
-  await saveTasks(tasks);
+  await col.insertOne({ ...task });
   return task;
 }
 
 export async function getTask(id: number): Promise<Task | undefined> {
-  const tasks = await getTasks();
-  return tasks.find(t => t.id === id);
+  const col = await getCollection();
+  const doc = await col.findOne({ id });
+  return doc ? Task.fromObject(doc) : undefined;
 }
 
 export async function updateTask(
@@ -37,24 +37,19 @@ export async function updateTask(
   status: TaskStatus,
   category?: Category
 ): Promise<Task | undefined> {
-  const tasks = await getTasks();
-  const task = tasks.find(t => t.id === id);
-  if (!task) return undefined;
-  task.title = title;
-  task.status = status;
-  task.category = category;
-  if (status === 'completed' && !task.endDate) {
-    task.endDate = new Date();
+  const col = await getCollection();
+  const doc = await col.findOne({ id });
+  if (!doc) return undefined;
+  const update: Record<string, unknown> = { title, status, category };
+  if (status === 'completed' && !doc.endDate) {
+    update.endDate = new Date();
   }
-  await saveTasks(tasks);
-  return task;
+  await col.updateOne({ id }, { $set: update });
+  return Task.fromObject({ ...doc, ...update, endDate: update.endDate ?? doc.endDate });
 }
 
 export async function deleteTaskById(id: number): Promise<boolean> {
-  const tasks = await getTasks();
-  const index = tasks.findIndex(t => t.id === id);
-  if (index === -1) return false;
-  tasks.splice(index, 1);
-  await saveTasks(tasks);
-  return true;
+  const col = await getCollection();
+  const res = await col.deleteOne({ id });
+  return res.deletedCount === 1;
 }

@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { Task, TaskStatus, Category } from "@/models/Task";
-import { deleteTask } from "@/utils/taskUtils";
 
 interface Props {
   tasks: Task[];
@@ -19,13 +18,24 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
   const filtered =
     filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
 
-  function handleDelete(id: number) {
-    onUpdate(deleteTask(tasks, id));
+  async function handleDelete(id: number) {
+    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      onUpdate(tasks.filter((t) => t.id !== id));
+    }
   }
 
-  function handleComplete(task: Task) {
-    task.markCompleted();
-    onUpdate([...tasks]);
+  async function handleComplete(task: Task) {
+    const res = await fetch(`/api/tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: task.title, status: "completed", category: task.category }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const updated = tasks.map((t) => (t.id === task.id ? Task.fromObject(data) : t));
+      onUpdate(updated);
+    }
   }
 
   function startEdit(task: Task) {
@@ -35,10 +45,18 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
     setCategory(task.category);
   }
 
-  function saveEdit(task: Task) {
-    task.update(title, status, category);
-    onUpdate([...tasks]);
-    setEditingId(null);
+  async function saveEdit(task: Task) {
+    const res = await fetch(`/api/tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, status, category }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const updated = tasks.map((t) => (t.id === task.id ? Task.fromObject(data) : t));
+      onUpdate(updated);
+      setEditingId(null);
+    }
   }
 
   return (
