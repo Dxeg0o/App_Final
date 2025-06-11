@@ -13,8 +13,19 @@ export default function Stats({ tasks }: Props) {
   const avgMinutes = Math.round(average / 60000);
 
   return (
-    <div className="mt-4 text-sm">
-      <p>Porcentaje completado: {percent}%</p>
+    <div className="mt-4 text-sm space-y-2">
+      <div>
+        <div className="flex justify-between mb-1">
+          <span>Completado</span>
+          <span>{percent}%</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded">
+          <div
+            className="bg-blue-600 h-2 rounded"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+      </div>
       <p>Promedio de duración: {avgMinutes} minutos</p>
     </div>
   );

@@ -27,15 +27,18 @@ export default function TaskForm({ categories, onAdd }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 my-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row gap-2 my-4"
+    >
       <input
-        className="border p-2 flex-grow"
+        className="border p-2 rounded-md flex-grow"
         placeholder="Nueva tarea"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <select
-        className="border p-2"
+        className="border p-2 rounded-md"
         value={category?.id ?? ""}
         onChange={(e) => {
           const id = parseInt(e.target.value);
@@ -50,7 +53,10 @@ export default function TaskForm({ categories, onAdd }: Props) {
           </option>
         ))}
       </select>
-      <button type="submit" className="bg-blue-600 text-white px-3 py-2">
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-4 py-2 rounded-md"
+      >
         Agregar
       </button>
     </form>
