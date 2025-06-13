@@ -32,12 +32,6 @@ interface Props {
 }
 
 export default function TaskList({ tasks, categories, onUpdate }: Props) {
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [status, setStatus] = useState<TaskStatus>("pending");
-  const [category, setCategory] = useState<Category | undefined>();
 
   const pendingTasks = tasks.filter((t) => t.status === "pending");
   const inProgressTasks = tasks.filter((t) => t.status === "in-progress");
@@ -69,36 +63,6 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
     }
   }
 
-  function startEdit(task: Task) {
-    setEditingId(task.id);
-    setTitle(task.title);
-    setDescription(task.description);
-    setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().slice(0,16) : "");
-    setStatus(task.status);
-    setCategory(task.category);
-  }
-
-  async function saveEdit(task: Task) {
-    const res = await fetch(`/api/tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        status,
-        category,
-        description,
-        dueDate: dueDate || undefined,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const updated = tasks.map((t) =>
-        t.id === task.id ? Task.fromObject(data) : t
-      );
-      onUpdate(updated);
-      setEditingId(null);
-    }
-  }
 
   function getStatusIcon(status: TaskStatus) {
     switch (status) {
@@ -140,7 +104,36 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
   }
 
   function TaskCard({ task }: { task: Task }) {
-    const isEditing = editingId === task.id;
+    const [isEditing, setIsEditing] = useState(false);
+    const [title, setTitle] = useState(task.title);
+    const [description, setDescription] = useState(task.description);
+    const [dueDate, setDueDate] = useState(
+      task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""
+    );
+    const [status, setStatus] = useState<TaskStatus>(task.status);
+    const [category, setCategory] = useState<Category | undefined>(task.category);
+
+    async function saveEdit() {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          status,
+          category,
+          description,
+          dueDate: dueDate || undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = tasks.map((t) =>
+          t.id === task.id ? Task.fromObject(data) : t
+        );
+        onUpdate(updated);
+        setIsEditing(false);
+      }
+    }
 
     return (
       <Card
@@ -207,16 +200,12 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={() => saveEdit(task)}
-                  size="sm"
-                  className="gap-2"
-                >
+                <Button onClick={saveEdit} size="sm" className="gap-2">
                   <Save className="w-4 h-4" />
                   Guardar
                 </Button>
                 <Button
-                  onClick={() => setEditingId(null)}
+                  onClick={() => setIsEditing(false)}
                   variant="outline"
                   size="sm"
                   className="gap-2"
@@ -272,7 +261,7 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                   </Button>
                 )}
                 <Button
-                  onClick={() => startEdit(task)}
+                  onClick={() => setIsEditing(true)}
                   variant="ghost"
                   size="sm"
                   className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
