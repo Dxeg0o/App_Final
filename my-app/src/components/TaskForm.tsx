@@ -24,6 +24,8 @@ interface Props {
 
 export default function TaskForm({ categories, onAdd, onCancel }: Props) {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [category, setCategory] = useState<Category | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,12 +38,20 @@ export default function TaskForm({ categories, onAdd, onCancel }: Props) {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, status: "pending", category }),
+        body: JSON.stringify({
+          title,
+          status: "pending",
+          category,
+          description,
+          dueDate: dueDate || undefined,
+        }),
       });
       if (res.ok) {
         const data = await res.json();
         onAdd(Task.fromObject(data));
         setTitle("");
+        setDescription("");
+        setDueDate("");
         setCategory(undefined);
       }
     } finally {
@@ -61,6 +71,17 @@ export default function TaskForm({ categories, onAdd, onCancel }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="text-base"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descripción</Label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full border rounded-md p-2 text-base dark:bg-input/30"
+              rows={3}
             />
           </div>
 
@@ -90,6 +111,17 @@ export default function TaskForm({ categories, onAdd, onCancel }: Props) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dueDate">Fecha límite</Label>
+            <Input
+              id="dueDate"
+              type="datetime-local"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="text-base"
+            />
           </div>
 
           <div className="flex gap-2 pt-2">

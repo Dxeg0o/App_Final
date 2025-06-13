@@ -7,10 +7,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { title, status, category } = await request.json();
+  const { title, status, category, description, dueDate } = await request.json();
   if (!title) {
     return NextResponse.json({ error: 'Title required' }, { status: 400 });
   }
-  const task = await addTask(title, status, category);
+  const parsedDue = dueDate ? new Date(dueDate) : undefined;
+  const task = await addTask(title, status, category, description, parsedDue);
   return NextResponse.json(task, { status: 201 });
 }

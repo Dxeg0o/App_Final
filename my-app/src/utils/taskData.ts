@@ -15,12 +15,14 @@ export async function getTasks(): Promise<Task[]> {
 export async function addTask(
   title: string,
   status: TaskStatus = 'pending',
-  category?: Category
+  category?: Category,
+  description = '',
+  dueDate?: Date
 ): Promise<Task> {
   const col = await getCollection();
   const last = await col.find().sort({ id: -1 }).limit(1).toArray();
   const id = last.length ? last[0].id + 1 : 1;
-  const task = new Task(id, title, status, category);
+  const task = new Task(id, title, status, category, new Date(), description, dueDate);
   await col.insertOne({ ...task });
   return task;
 }
@@ -35,12 +37,18 @@ export async function updateTask(
   id: number,
   title: string,
   status: TaskStatus,
-  category?: Category
+  category?: Category,
+  description?: string,
+  dueDate?: Date
 ): Promise<Task | undefined> {
   const col = await getCollection();
   const doc = await col.findOne({ id });
   if (!doc) return undefined;
   const update: Record<string, unknown> = { title, status, category };
+  if (description !== undefined) {
+    update.description = description;
+  }
+  update.dueDate = dueDate;
   if (status === 'completed' && !doc.endDate) {
     update.endDate = new Date();
   }

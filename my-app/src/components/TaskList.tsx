@@ -34,6 +34,8 @@ interface Props {
 export default function TaskList({ tasks, categories, onUpdate }: Props) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState<TaskStatus>("pending");
   const [category, setCategory] = useState<Category | undefined>();
 
@@ -70,6 +72,8 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
   function startEdit(task: Task) {
     setEditingId(task.id);
     setTitle(task.title);
+    setDescription(task.description);
+    setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().slice(0,16) : "");
     setStatus(task.status);
     setCategory(task.category);
   }
@@ -78,7 +82,13 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
     const res = await fetch(`/api/tasks/${task.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, status, category }),
+      body: JSON.stringify({
+        title,
+        status,
+        category,
+        description,
+        dueDate: dueDate || undefined,
+      }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -145,6 +155,17 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título de la tarea"
+              />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full border rounded-md p-2 text-sm dark:bg-input/30"
+                rows={3}
+              />
+              <Input
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
               />
               <div className="flex gap-2">
                 <Select
@@ -227,6 +248,16 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                       </Badge>
                     )}
                   </div>
+                  {task.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {task.description}
+                    </p>
+                  )}
+                  {task.dueDate && (
+                    <p className="text-xs text-muted-foreground">
+                      Vence: {new Date(task.dueDate).toLocaleString()}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1">

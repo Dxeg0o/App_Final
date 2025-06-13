@@ -5,9 +5,11 @@ let taskId = 0;
 export function createTask(
   title: string,
   status: TaskStatus = "pending",
-  category?: Category
+  category?: Category,
+  description = "",
+  dueDate?: Date
 ): Task {
-  return new Task(++taskId, title, status, category);
+  return new Task(++taskId, title, status, category, new Date(), description, dueDate);
 }
 
 export function deleteTask(tasks: Task[], id: number): Task[] {
