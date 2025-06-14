@@ -75,10 +75,12 @@ export default function TaskForm({
   }
 
   return (
-    <Card className="bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-white text-base">
-          <Zap className="w-4 h-4 text-teal-400" />
+    <Card className="bg-gradient-to-br from-indigo-900/40 via-black/30 to-teal-900/40 backdrop-blur-xl border-indigo-500/30 shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 ring-1 ring-indigo-500/10">
+      <CardHeader className="pb-4 border-b border-indigo-500/20">
+        <CardTitle className="flex items-center gap-2 text-white text-lg font-semibold">
+          <div className="p-2 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-lg">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
           {defaultDate
             ? `Nueva Tarea - ${defaultDate.toLocaleDateString("es-ES")}`
             : "Nueva Tarea"}
@@ -113,7 +115,7 @@ export default function TaskForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category" className="text-gray-300 font-medium">
                 Categoría
@@ -130,10 +132,10 @@ export default function TaskForm({
                   }
                 }}
               >
-                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-400">
+                <SelectTrigger className="bg-white/5 border-slate-600/50 text-white focus:border-indigo-400 focus:ring-indigo-400/20">
                   <SelectValue placeholder="Selecciona una categoría" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/10">
+                <SelectContent className="bg-slate-800 border-slate-600/50">
                   <SelectItem
                     value="none"
                     className="text-white hover:bg-white/10"
@@ -162,7 +164,7 @@ export default function TaskForm({
                 type="datetime-local"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="bg-white/5 border-white/10 text-white focus:border-purple-400 focus:ring-purple-400/20"
+                className="bg-white/5 border-slate-600/50 text-white focus:border-indigo-400 focus:ring-indigo-400/20"
               />
             </div>
           </div>
@@ -171,7 +173,7 @@ export default function TaskForm({
             <Button
               type="submit"
               disabled={!title.trim() || isLoading}
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-teal-600 hover:from-indigo-700 hover:to-teal-700 text-white font-medium shadow-lg hover:shadow-indigo-500/25 transition-all duration-200 disabled:opacity-50"
+              className="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 hover:from-indigo-700 hover:via-purple-700 hover:to-teal-700 text-white font-semibold shadow-xl hover:shadow-indigo-500/30 transition-all duration-300 ring-2 ring-indigo-500/20 hover:ring-indigo-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4 mr-2" />
               {isLoading ? "Procesando..." : "Crear Tarea"}

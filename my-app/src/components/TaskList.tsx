@@ -341,28 +341,28 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/5 border border-white/10">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-slate-600/30">
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-purple-500 data-[state=active]:text-white"
+              className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
             >
               Todas ({tasks.length})
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="data-[state=active]:bg-gray-500 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gray-600 data-[state=active]:text-white text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
             >
               Pendientes ({pendingTasks.length})
             </TabsTrigger>
             <TabsTrigger
               value="in-progress"
-              className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
+              className="data-[state=active]:bg-amber-600 data-[state=active]:text-white text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
             >
               En progreso ({inProgressTasks.length})
             </TabsTrigger>
             <TabsTrigger
               value="completed"
-              className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
+              className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
             >
               Completadas ({completedTasks.length})
             </TabsTrigger>
