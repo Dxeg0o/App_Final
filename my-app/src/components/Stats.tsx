@@ -4,7 +4,14 @@ import type { Task } from "@/models/Task";
 import { averageDuration, percentageCompleted } from "@/utils/taskUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock, ListTodo, Timer } from "lucide-react";
+// Cambiar los iconos para ser más tech
+import {
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  Activity,
+  TrendingUp,
+} from "lucide-react";
 
 interface Props {
   tasks: Task[];
@@ -21,78 +28,100 @@ export default function Stats({ tasks }: Props) {
     (t) => t.status === "in-progress"
   ).length;
 
+  // Actualizar los stats con iconos más tech
   const stats = [
     {
-      title: "Total de Tareas",
+      title: "Total",
       value: totalTasks,
-      icon: ListTodo,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100 dark:bg-blue-900",
+      icon: BarChart3,
+      gradient: "from-indigo-400 to-teal-400",
+      bgGradient: "from-indigo-500/15 to-teal-500/15",
     },
     {
       title: "Completadas",
       value: completedTasks,
       icon: CheckCircle2,
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900",
+      gradient: "from-emerald-400 to-green-400",
+      bgGradient: "from-emerald-500/15 to-green-500/15",
     },
     {
-      title: "En Progreso",
+      title: "En Proceso",
       value: inProgressTasks,
-      icon: Clock,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100 dark:bg-yellow-900",
+      icon: Activity,
+      gradient: "from-amber-400 to-orange-400",
+      bgGradient: "from-amber-500/15 to-orange-500/15",
     },
     {
-      title: "Promedio",
+      title: "Tiempo Prom.",
       value: `${avgMinutes}min`,
-      icon: Timer,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100 dark:bg-purple-900",
+      icon: Clock,
+      gradient: "from-violet-400 to-purple-400",
+      bgGradient: "from-violet-500/15 to-purple-500/15",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat, index) => (
-        <Card
-          key={index}
-          className="border-0 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm"
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </p>
-                <p className="text-2xl font-bold">{stat.value}</p>
+    <div className="space-y-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        {stats.map((stat, index) => (
+          <Card
+            key={index}
+            className="bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-xl hover:shadow-2xl transition-all duration-300 group"
+          >
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide truncate">
+                    {stat.title}
+                  </p>
+                  <p className="text-xl font-bold text-white mt-1 truncate">
+                    {stat.value}
+                  </p>
+                </div>
+                <div
+                  className={`p-2.5 rounded-xl bg-gradient-to-r ${stat.bgGradient} group-hover:scale-110 transition-transform duration-200 flex-shrink-0 ml-2`}
+                >
+                  <stat.icon
+                    className={`w-4 h-4 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+                  />
+                </div>
               </div>
-              <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
+      {/* Progress Card */}
       {totalTasks > 0 && (
-        <Card className="md:col-span-2 lg:col-span-4 border-0 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-              Progreso General
+        <Card className="bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-white text-base">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              Análisis de Rendimiento
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Completado</span>
-                <span className="text-sm font-bold">{percent.toFixed(0)}%</span>
-              </div>
-              <Progress value={percent} className="h-3" />
-              <p className="text-sm text-muted-foreground">
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-300">
+                Completado
+              </span>
+              <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
+                {percent.toFixed(0)}%
+              </span>
+            </div>
+            <div className="relative">
+              <Progress value={percent} className="h-2 bg-white/10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-full blur-sm"></div>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-400">
                 {completedTasks} de {totalTasks} tareas completadas
-              </p>
+              </span>
+              <div className="flex items-center gap-1 text-emerald-400">
+                <CheckCircle2 className="w-3 h-3" />
+                <span className="font-medium">¡Sigue así!</span>
+              </div>
             </div>
           </CardContent>
         </Card>

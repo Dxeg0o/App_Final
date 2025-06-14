@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Cambiar iconos y terminología
 import {
   CheckCircle2,
   Circle,
@@ -21,8 +22,8 @@ import {
   Trash2,
   Save,
   X,
-  Filter,
-  ListTodo,
+  BarChart3,
+  Cpu,
 } from "lucide-react";
 
 interface Props {
@@ -32,7 +33,6 @@ interface Props {
 }
 
 export default function TaskList({ tasks, categories, onUpdate }: Props) {
-
   const pendingTasks = tasks.filter((t) => t.status === "pending");
   const inProgressTasks = tasks.filter((t) => t.status === "in-progress");
   const completedTasks = tasks.filter((t) => t.status === "completed");
@@ -63,31 +63,22 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
     }
   }
 
-
   function getStatusIcon(status: TaskStatus) {
     switch (status) {
       case "completed":
-        return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+        return <CheckCircle2 className="w-5 h-5 text-green-400" />;
       case "in-progress":
-        return <Clock className="w-5 h-5 text-yellow-500" />;
+        return <Clock className="w-5 h-5 text-yellow-400" />;
       default:
         return <Circle className="w-5 h-5 text-gray-400" />;
     }
   }
 
   function getStatusBadge(status: TaskStatus) {
-    const variants = {
-      pending: "secondary",
-      "in-progress": "default",
-      completed: "default",
-    } as const;
-
-    const colors = {
-      pending: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-      "in-progress":
-        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-      completed:
-        "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+    const styles = {
+      pending: "bg-gray-500/20 text-gray-300 border-gray-500/30",
+      "in-progress": "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+      completed: "bg-green-500/20 text-green-300 border-green-500/30",
     };
 
     const labels = {
@@ -97,7 +88,7 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
     };
 
     return (
-      <Badge variant={variants[status]} className={colors[status]}>
+      <Badge variant="outline" className={styles[status]}>
         {labels[status]}
       </Badge>
     );
@@ -111,7 +102,9 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
       task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""
     );
     const [status, setStatus] = useState<TaskStatus>(task.status);
-    const [category, setCategory] = useState<Category | undefined>(task.category);
+    const [category, setCategory] = useState<Category | undefined>(
+      task.category
+    );
 
     async function saveEdit() {
       const res = await fetch(`/api/tasks/${task.id}`, {
@@ -137,41 +130,58 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
 
     return (
       <Card
-        className={`transition-all duration-200 hover:shadow-md ${
+        className={`bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-xl hover:shadow-2xl transition-all duration-300 group ${
           task.status === "completed" ? "opacity-75" : ""
         }`}
       >
-        <CardContent className="p-4">
+        <CardContent className="p-6">
           {isEditing ? (
             <div className="space-y-4">
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título de la tarea"
+                className="bg-white/5 border-white/10 text-white focus:border-purple-400"
               />
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full border rounded-md p-2 text-sm dark:bg-input/30"
+                className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white placeholder:text-gray-400 focus:border-purple-400 resize-none"
                 rows={3}
               />
               <Input
                 type="datetime-local"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
+                className="bg-white/5 border-white/10 text-white focus:border-purple-400"
               />
-              <div className="flex gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Select
                   value={status}
                   onValueChange={(value) => setStatus(value as TaskStatus)}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="in-progress">En progreso</SelectItem>
-                    <SelectItem value="completed">Completada</SelectItem>
+                  <SelectContent className="bg-slate-800 border-white/10">
+                    <SelectItem
+                      value="pending"
+                      className="text-white hover:bg-white/10"
+                    >
+                      Pendiente
+                    </SelectItem>
+                    <SelectItem
+                      value="in-progress"
+                      className="text-white hover:bg-white/10"
+                    >
+                      En progreso
+                    </SelectItem>
+                    <SelectItem
+                      value="completed"
+                      className="text-white hover:bg-white/10"
+                    >
+                      Completada
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <Select
@@ -186,64 +196,83 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                     }
                   }}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue placeholder="Categoría" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin categoría</SelectItem>
+                  <SelectContent className="bg-slate-800 border-white/10">
+                    <SelectItem
+                      value="none"
+                      className="text-white hover:bg-white/10"
+                    >
+                      Sin categoría
+                    </SelectItem>
                     {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id.toString()}>
+                      <SelectItem
+                        key={c.id}
+                        value={c.id.toString()}
+                        className="text-white hover:bg-white/10"
+                      >
                         {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex gap-2">
-                <Button onClick={saveEdit} size="sm" className="gap-2">
-                  <Save className="w-4 h-4" />
+              <div className="flex gap-3">
+                <Button
+                  onClick={saveEdit}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Save className="w-4 h-4 mr-2" />
                   Guardar
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="border-white/20 text-gray-300 hover:bg-white/5"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 mr-2" />
                   Cancelar
                 </Button>
               </div>
             </div>
           ) : (
             <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3 flex-1">
-                <div className="mt-1">{getStatusIcon(task.status)}</div>
-                <div className="flex-1 space-y-2">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="mt-1 group-hover:scale-110 transition-transform duration-200">
+                  {getStatusIcon(task.status)}
+                </div>
+                <div className="flex-1 space-y-3">
                   <h3
-                    className={`font-medium ${
+                    className={`font-semibold text-lg ${
                       task.status === "completed"
-                        ? "line-through text-muted-foreground"
-                        : ""
+                        ? "line-through text-gray-400"
+                        : "text-white"
                     }`}
                   >
                     {task.title}
                   </h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {getStatusBadge(task.status)}
                     {task.category && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge
+                        variant="outline"
+                        className="bg-purple-500/20 text-purple-300 border-purple-500/30"
+                      >
                         {task.category.name}
                       </Badge>
                     )}
                   </div>
                   {task.description && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-gray-300 text-sm leading-relaxed">
                       {task.description}
                     </p>
                   )}
                   {task.dueDate && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
                       Vence: {new Date(task.dueDate).toLocaleString()}
                     </p>
                   )}
@@ -255,7 +284,7 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                     onClick={() => handleComplete(task)}
                     variant="ghost"
                     size="sm"
-                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                    className="text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-all duration-200"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                   </Button>
@@ -264,7 +293,7 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                   onClick={() => setIsEditing(true)}
                   variant="ghost"
                   size="sm"
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all duration-200"
                 >
                   <Edit3 className="w-4 h-4" />
                 </Button>
@@ -272,7 +301,7 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
                   onClick={() => handleDelete(task.id)}
                   variant="ghost"
                   size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -286,12 +315,15 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
 
   if (tasks.length === 0) {
     return (
-      <Card className="text-center py-12">
-        <CardContent>
-          <ListTodo className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">No hay tareas</h3>
-          <p className="text-muted-foreground">
-            Comienza agregando tu primera tarea
+      <Card className="bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-xl">
+        <CardContent className="text-center py-16">
+          {/* En el estado vacío, cambiar el mensaje */}
+          <Cpu className="w-16 h-16 text-cyan-400 mx-auto mb-6" />
+          <h3 className="text-xl font-semibold mb-3 text-white">
+            Sistema en espera
+          </h3>
+          <p className="text-gray-400 text-lg">
+            Inicializa tu flujo de trabajo agregando la primera tarea
           </p>
         </CardContent>
       </Card>
@@ -299,55 +331,68 @@ export default function TaskList({ tasks, categories, onUpdate }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Mis Tareas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">Todas ({tasks.length})</TabsTrigger>
-              <TabsTrigger value="pending">
-                Pendientes ({pendingTasks.length})
-              </TabsTrigger>
-              <TabsTrigger value="in-progress">
-                En progreso ({inProgressTasks.length})
-              </TabsTrigger>
-              <TabsTrigger value="completed">
-                Completadas ({completedTasks.length})
-              </TabsTrigger>
-            </TabsList>
+    <Card className="bg-black/30 backdrop-blur-xl border-slate-700/30 shadow-xl">
+      <CardHeader className="pb-4">
+        {/* Cambiar el título de la sección */}
+        <CardTitle className="flex items-center gap-2 text-white text-lg">
+          <BarChart3 className="w-5 h-5 text-teal-400" />
+          Dashboard de Tareas
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-white/5 border border-white/10">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-purple-500 data-[state=active]:text-white"
+            >
+              Todas ({tasks.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="pending"
+              className="data-[state=active]:bg-gray-500 data-[state=active]:text-white"
+            >
+              Pendientes ({pendingTasks.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="in-progress"
+              className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
+            >
+              En progreso ({inProgressTasks.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="completed"
+              className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
+            >
+              Completadas ({completedTasks.length})
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="all" className="space-y-4 mt-6">
-              {tasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TabsContent>
+          <TabsContent value="all" className="space-y-4 mt-6">
+            {tasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TabsContent>
 
-            <TabsContent value="pending" className="space-y-4 mt-6">
-              {pendingTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TabsContent>
+          <TabsContent value="pending" className="space-y-4 mt-6">
+            {pendingTasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TabsContent>
 
-            <TabsContent value="in-progress" className="space-y-4 mt-6">
-              {inProgressTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TabsContent>
+          <TabsContent value="in-progress" className="space-y-4 mt-6">
+            {inProgressTasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TabsContent>
 
-            <TabsContent value="completed" className="space-y-4 mt-6">
-              {completedTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+          <TabsContent value="completed" className="space-y-4 mt-6">
+            {completedTasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }
