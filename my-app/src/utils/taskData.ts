@@ -1,15 +1,27 @@
-import clientPromise from './mongodb';
+import prisma from './prisma';
 import { Task, TaskStatus, Category } from '@/models/Task';
+import type { Task as PrismaTask, Category as PrismaCategory, Prisma } from '@prisma/client';
 
-async function getCollection() {
-  const client = await clientPromise;
-  return client.db().collection('tasks');
+function toModel(task: PrismaTask & { category?: PrismaCategory | null }): Task {
+  const category = task.category
+    ? new Category(task.category.id, task.category.name)
+    : undefined;
+  const t = new Task(
+    task.id,
+    task.title,
+    task.status as TaskStatus,
+    category,
+    task.startDate,
+    task.description ?? '',
+    task.dueDate ?? undefined
+  );
+  if (task.endDate) t.endDate = task.endDate;
+  return t;
 }
 
 export async function getTasks(): Promise<Task[]> {
-  const col = await getCollection();
-  const docs = await col.find().toArray();
-  return docs.map((d: Record<string, unknown>) => Task.fromObject(d));
+  const tasks = await prisma.task.findMany({ include: { category: true } });
+  return tasks.map(toModel);
 }
 
 export async function addTask(
@@ -19,18 +31,27 @@ export async function addTask(
   description = '',
   dueDate?: Date
 ): Promise<Task> {
-  const col = await getCollection();
-  const last = await col.find().sort({ id: -1 }).limit(1).toArray();
-  const id = last.length ? last[0].id + 1 : 1;
-  const task = new Task(id, title, status, category, new Date(), description, dueDate);
-  await col.insertOne({ ...task });
-  return task;
+  const data: Prisma.TaskUncheckedCreateInput = {
+    title,
+    status,
+    description,
+    dueDate,
+  };
+  if (category) {
+    data.category = {
+      connectOrCreate: {
+        where: { id: category.id },
+        create: { id: category.id, name: category.name },
+      },
+    };
+  }
+  const task = await prisma.task.create({ data, include: { category: true } });
+  return toModel(task);
 }
 
 export async function getTask(id: number): Promise<Task | undefined> {
-  const col = await getCollection();
-  const doc = await col.findOne({ id });
-  return doc ? Task.fromObject(doc) : undefined;
+  const task = await prisma.task.findUnique({ where: { id }, include: { category: true } });
+  return task ? toModel(task) : undefined;
 }
 
 export async function updateTask(
@@ -41,23 +62,32 @@ export async function updateTask(
   description?: string,
   dueDate?: Date
 ): Promise<Task | undefined> {
-  const col = await getCollection();
-  const doc = await col.findOne({ id });
-  if (!doc) return undefined;
-  const update: Record<string, unknown> = { title, status, category };
-  if (description !== undefined) {
-    update.description = description;
+  const existing = await prisma.task.findUnique({ where: { id }, include: { category: true } });
+  if (!existing) return undefined;
+  const data: Prisma.TaskUncheckedUpdateInput = { title, status, dueDate };
+  if (description !== undefined) data.description = description;
+  if (status === 'completed' && !existing.endDate) {
+    data.endDate = new Date();
   }
-  update.dueDate = dueDate;
-  if (status === 'completed' && !doc.endDate) {
-    update.endDate = new Date();
+  if (category) {
+    data.category = {
+      connectOrCreate: {
+        where: { id: category.id },
+        create: { id: category.id, name: category.name },
+      },
+    };
+  } else {
+    data.category = { disconnect: true };
   }
-  await col.updateOne({ id }, { $set: update });
-  return Task.fromObject({ ...doc, ...update, endDate: update.endDate ?? doc.endDate });
+  const task = await prisma.task.update({ where: { id }, data, include: { category: true } });
+  return toModel(task);
 }
 
 export async function deleteTaskById(id: number): Promise<boolean> {
-  const col = await getCollection();
-  const res = await col.deleteOne({ id });
-  return res.deletedCount === 1;
+  try {
+    await prisma.task.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
 }

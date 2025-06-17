@@ -33,10 +33,16 @@ npm install
 npm run dev
 ```
 
-Antes de iniciar, cree un archivo `.env.local` dentro de `my-app` con la cadena de conexión a MongoDB:
+Antes de iniciar, cree un archivo `.env.local` dentro de `my-app` con la cadena de conexión que provee **Supabase**. Por ejemplo:
 
 ```bash
-MONGODB_URI="mongodb+srv://dsolerolguin:<db_password>@cluster0.1zeyvn9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+DATABASE_URL="postgresql://user:password@db.awyvoajslabgnethctiu.supabase.co:5432/postgres"
+```
+
+Luego ejecute Prisma para generar el cliente:
+
+```bash
+npx prisma generate
 ```
 
 Abrir `http://localhost:3000` en el navegador.
