@@ -1,28 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTask, updateTask, deleteTaskById } from "@/utils/taskData";
-import jwt from "jsonwebtoken";
-
-const secret = process.env.JWT_SECRET || "secret";
-
-function getUsername(request: NextRequest): string | null {
-  const token = request.cookies.get("token")?.value;
-  if (!token) return null;
-  try {
-    const decoded = jwt.verify(token, secret) as { username: string };
-    return decoded.username;
-  } catch {
-    return null;
-  }
-}
+import { auth0 } from "@/lib/auth0";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const username = getUsername(request);
-  if (!username) {
+  const session = await auth0.getSession();
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // The type of username is `string | undefined` here
+  const username = session.user.sub || session.user.email;
+
+  // Add a check to handle the case where username is undefined
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+  // From this point on, TypeScript knows `username` is a `string`
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const task = await getTask(taskId, username);
@@ -36,10 +36,21 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const username = getUsername(request);
-  if (!username) {
+  const session = await auth0.getSession();
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const username = session.user.sub || session.user.email;
+
+  // Add the same check here
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const body = await request.json();
@@ -63,10 +74,21 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const username = getUsername(request);
-  if (!username) {
+  const session = await auth0.getSession();
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const username = session.user.sub || session.user.email;
+
+  // And also add the check here
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const success = await deleteTaskById(taskId, username);

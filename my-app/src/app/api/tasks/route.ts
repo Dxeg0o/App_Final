@@ -1,39 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getTasks, addTask } from '@/utils/taskData';
-import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from "next/server";
+import { getTasks, addTask } from "@/utils/taskData";
+import { auth0 } from "@/lib/auth0";
 
-const secret = process.env.JWT_SECRET || 'secret';
-
-function getUsername(request: NextRequest): string | null {
-  const token = request.cookies.get('token')?.value;
-  if (!token) return null;
-  try {
-    const decoded = jwt.verify(token, secret) as { username: string };
-    return decoded.username;
-  } catch {
-    return null;
+export async function GET() {
+  const session = await auth0.getSession();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-}
 
-export async function GET(request: NextRequest) {
-  const username = getUsername(request);
+  const username = session.user.sub || session.user.email;
+
+  // Add a check to ensure username is a valid string
   if (!username) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
   }
+  // From this point, TypeScript knows `username` is a `string`
+
   const tasks = await getTasks(username);
   return NextResponse.json(tasks);
 }
 
 export async function POST(request: NextRequest) {
-  const username = getUsername(request);
+  const session = await auth0.getSession();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const username = session.user.sub || session.user.email;
+
+  // Add the same check here
   if (!username) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
   }
-  const { title, status, category, description, dueDate } = await request.json();
+
+  const { title, status, category, description, dueDate } =
+    await request.json();
   if (!title) {
-    return NextResponse.json({ error: 'Title required' }, { status: 400 });
+    return NextResponse.json({ error: "Title required" }, { status: 400 });
   }
+
   const parsedDue = dueDate ? new Date(dueDate) : undefined;
-  const task = await addTask(title, status, category, description, parsedDue, username);
+  const task = await addTask(
+    title,
+    status,
+    category,
+    description,
+    parsedDue,
+    username
+  );
   return NextResponse.json(task, { status: 201 });
 }
