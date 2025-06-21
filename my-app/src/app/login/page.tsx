@@ -19,7 +19,7 @@ export default function LoginPage() {
       body: JSON.stringify({ username, password }),
     });
     if (res.ok) {
-      router.push('/');
+      router.push('/dashboard');
     } else {
       const data = await res.json();
       setError(data.error || 'Error de autenticación');
