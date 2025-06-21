@@ -10,7 +10,19 @@ export async function GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // The type of username is `string | undefined` here
   const username = session.user.sub || session.user.email;
+
+  // Add a check to handle the case where username is undefined
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+  // From this point on, TypeScript knows `username` is a `string`
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const task = await getTask(taskId, username);
@@ -28,7 +40,17 @@ export async function PUT(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
   const username = session.user.sub || session.user.email;
+
+  // Add the same check here
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const body = await request.json();
@@ -56,7 +78,17 @@ export async function DELETE(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
   const username = session.user.sub || session.user.email;
+
+  // And also add the check here
+  if (!username) {
+    return NextResponse.json(
+      { error: "Username not found in session" },
+      { status: 400 }
+    );
+  }
+
   const { id } = await params;
   const taskId = parseInt(id, 10);
   const success = await deleteTaskById(taskId, username);
