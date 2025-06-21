@@ -13,7 +13,8 @@ export class Task {
     public category?: Category,
     public startDate: Date = new Date(),
     public description: string = "",
-    public dueDate?: Date
+    public dueDate?: Date,
+    public username?: string
   ) {}
 
   static fromObject(obj: Record<string, unknown>): Task {
@@ -24,7 +25,8 @@ export class Task {
       obj.category as Category,
       new Date(obj.startDate as string | number | Date),
       (obj.description as string) || "",
-      obj.dueDate ? new Date(obj.dueDate as string | number | Date) : undefined
+      obj.dueDate ? new Date(obj.dueDate as string | number | Date) : undefined,
+      obj.username as string | undefined
     );
     if (obj.endDate) {
       task.endDate = new Date(obj.endDate as string | number | Date);

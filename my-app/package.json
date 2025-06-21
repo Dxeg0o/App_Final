@@ -10,6 +10,7 @@
     "cli": "node scripts/cli.js"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.3.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.5",
