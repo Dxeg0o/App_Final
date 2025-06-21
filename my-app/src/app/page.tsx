@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { Cpu } from "lucide-react";
 
 export default function LandingPage() {
@@ -14,11 +13,12 @@ export default function LandingPage() {
         </h1>
       </div>
       <p className="max-w-xl mb-8 text-lg text-gray-300">
-        Bienvenido a TaskFlow AI, tu asistente inteligente para la gestión de tareas. Inicia sesión o regístrate para comenzar a organizar tu trabajo de forma eficiente.
+        Bienvenido a TaskFlow AI, tu asistente inteligente para la gestión de
+        tareas. Inicia sesión o regístrate para comenzar a organizar tu trabajo
+        de forma eficiente.
       </p>
       <div className="flex space-x-4">
-        <Link href="/login" className="px-6 py-3 rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors">Iniciar sesión</Link>
-        <Link href="/register" className="px-6 py-3 rounded-md bg-teal-600 hover:bg-teal-700 transition-colors">Registrarse</Link>
+        <a href="/auth/login">Iniciar sesión</a>
       </div>
     </div>
   );
